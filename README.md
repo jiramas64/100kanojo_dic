@@ -34,6 +34,18 @@ If your Japanese input method doesn’t support importing a text dictionary dire
 - For example, check if it needs UTF‑8 or Shift‑JIS, tab‐separated fields, etc.
 - Use a script (Python, etc.) to reformat if necessary.
 
+## Feedback / Feature Requests
+
+We welcome feedback, feature requests, and contributions!
+
+If you have any suggestions or issues regarding this dictionary, feel free to:
+
+- Submit a **Pull Request** or **Issue** on this GitHub repository
+- Contact me on **X (formerly Twitter)**: [@jira_ill](https://twitter.com/jira_ill)
+- Join the conversation on **Discord**: [https://discord.gg/5R8jHJFWfv](https://discord.gg/5R8jHJFWfv)
+
+We're happy to hear your thoughts and work together to improve this project!
+
 ---
 
 ## 君のことが大大大大大好きな100人の彼女 IME 辞書の導入方法
@@ -69,3 +81,16 @@ If your Japanese input method doesn’t support importing a text dictionary dire
 - IMEが受け入れるフォーマット（例えば、エンコーディングや区切り文字）に辞書ファイルの形式を変換する必要があるかもしれません。
 - 例えば、UTF-8やShift-JIS、タブ区切りなどの形式が必要かもしれません。
 - 必要であれば、Pythonなどのスクリプトを使って再フォーマットすることができます。
+
+## フィードバック・要望について
+
+この辞書に関するご意見・ご要望・改善提案などがあれば、ぜひお知らせください！
+
+以下のいずれかの方法でお気軽にご連絡ください：
+
+- GitHub で **Issue** または **Pull Request** を送る  
+- **X（旧Twitter）** にて連絡: [@jira_ill](https://twitter.com/jira_ill)
+- **Discord** サーバーに参加して投稿する: [https://discord.gg/5R8jHJFWfv](https://discord.gg/5R8jHJFWfv)
+
+皆さまからのフィードバックをお待ちしています！
+
