@@ -36,7 +36,7 @@ If your Japanese input method doesn’t support importing a text dictionary dire
 
 ---
 
-## 100kanojo IME 辞書の導入方法
+## 君のことが大大大大大好きな100人の彼女 IME 辞書の導入方法
 
 以下の手順は、すでにリポジトリから辞書ファイル（例: `100kanojo_dic.txt`、`100kanojo_gboard_dic.txt`、または `100kanojo_shiftjis_dic.txt`）をダウンロードしていることを前提としています。
 
