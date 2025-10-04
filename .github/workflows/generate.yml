@@ -68,7 +68,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add 100kanojo_*dic.txt
-          git commit -m "chore: auto-generate IME dictionaries for v${{ env.VERSION }}" || echo "No changes to commit"
+          git commit -m "chore: auto-generate IME dictionaries for v${{ steps.version.outputs.VERSION }}" || echo "No changes to commit"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,10 +76,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.VERSION }}
-          name: "Release ${{ env.VERSION }}"
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: "Release ${{ steps.version.outputs.VERSION }}"
           body: |
-            このリリースは **単行本${{ env.VOLUME }}巻** に対応しています。
+            このリリースは **単行本${{ steps.version.outputs.VOLUME }}巻** に対応しています。
             自動生成された IME 辞書ファイル（通常版 + _Usami版）が含まれています。
           files: |
             100kanojo_*dic.txt
