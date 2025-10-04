@@ -60,6 +60,8 @@ jobs:
           VERSION="v${MAJOR}.${VOLUME}.${PATCH}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "VOLUME=$VOLUME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "VOLUME=$VOLUME" >> $GITHUB_OUTPUT
           echo "Version = $VERSION"
 
       - name: Commit generated files
