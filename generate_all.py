@@ -4,7 +4,7 @@ import os
 import codecs
 
 # === 設定 ===
-BASE_DIR = "base_files"
+BASE_DIR = "."
 OUTPUT_DIR = "."
 
 GBOARD_FILE = "100kanojo_Gboard_dic.txt"
