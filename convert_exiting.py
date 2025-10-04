@@ -3,9 +3,9 @@
 convert_existing.py
 
 既存の 100kanojo_dic.txt (UTF-16, 読み\t単語\t品詞) を読み込み、
-LibreOffice Calc で編集可能な base_names.csv と base_words.csv を生成する。
+LibreOffice Calc で編集可能な base_people.csv と base_words.csv を生成する。
 
-- 単語に全角スペース「　」が含まれる場合 → フルネームとみなして base_names.csv に出力
+- 単語に全角スペース「　」が含まれる場合 → フルネームとみなして base_people.csv に出力
   - 姓と名に分割
   - 姓や名が単独で登録されていれば、その読みを補完
   - 見つからなければ空欄にする（手動で補完する）
@@ -19,7 +19,7 @@ import csv
 from pathlib import Path
 
 INPUT_FILE = "100kanojo_dic.txt"
-BASE_NAMES = "base_names.csv"
+BASE_PEOPLE = "base_people.csv"
 BASE_WORDS = "base_words.csv"
 
 
@@ -65,7 +65,7 @@ def convert():
             words.append({"よみ": yomi, "単語": word})
 
     # 書き出し（UTF-8 BOM付き）
-    with open(BASE_NAMES, "w", encoding="utf-8-sig", newline="") as f:
+    with open(BASE_PEOPLE, "w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["姓よみ", "名よみ", "姓", "名"])
         writer.writeheader()
         writer.writerows(names)
@@ -75,7 +75,7 @@ def convert():
         writer.writeheader()
         writer.writerows(words)
 
-    print(f"変換完了: {BASE_NAMES}, {BASE_WORDS}")
+    print(f"変換完了: {BASE_PEOPLE}, {BASE_WORDS}")
     print("※ 姓よみ/名よみ が空欄の部分は手動で補完してください。")
 
 
