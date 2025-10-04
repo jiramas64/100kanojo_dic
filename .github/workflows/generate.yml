@@ -83,5 +83,6 @@ jobs:
             自動生成された IME 辞書ファイル（通常版 + _Usami版）が含まれています。
           files: |
             100kanojo_*dic.txt
+            100kanojo_*dic_Usami.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
