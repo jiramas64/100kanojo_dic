@@ -1,134 +1,98 @@
-#!/usr/bin/env python3
-"""
-generate_all.py
-
-base_names.csv / base_words.csv から
-Gboard / MSIME / その他 用の辞書ファイルを生成する
-
-出力ファイル:
-- 100kanojo_Gboard_dic.txt         (UTF-8 BOM, 読み\t単語\tja-JP)
-- 100kanojo_Shiftjis_dic.txt       (Shift_JIS, 読み\t単語\t品詞)
-- 100kanojo_dic.txt                (UTF-16, 読み\t単語\t品詞)
-- 上記の _Usami 版（単語内スペース削除）
-"""
-
 import csv
+import datetime
+import os
 import codecs
-from pathlib import Path
 
-# 入力 CSV
-NAMES_CSV = "base_names.csv"
-WORDS_CSV = "base_words.csv"
+# === 設定 ===
+BASE_DIR = "base_files"
+OUTPUT_DIR = "."
 
-# 出力定義
-TARGETS = [
-    {
-        "filename": "100kanojo_Gboard_dic.txt",
-        "formatter": lambda yomi, word, pos: f"{yomi[:15]}\t{word}\tja-JP\n",
-        "encoding": "utf-8-sig",
-    },
-    {
-        "filename": "100kanojo_Shiftjis_dic.txt",
-        "formatter": lambda yomi, word, pos: f"{yomi}\t{word}\t{pos}\n",
-        "encoding": "shift_jis",
-    },
-    {
-        "filename": "100kanojo_dic.txt",
-        "formatter": lambda yomi, word, pos: f"{yomi}\t{word}\t{pos}\n",
-        "encoding": "utf-16",
-    },
+GBOARD_FILE = "100kanojo_Gboard_dic.txt"
+MSIME_FILE = "100kanojo_Shiftjis_dic.txt"
+OTHER_FILE = "100kanojo_dic.txt"
+
+FILES = [
+    (GBOARD_FILE, "utf-8-sig", "Gboard"),
+    (MSIME_FILE, "shift_jis", "MSIME"),
+    (OTHER_FILE, "utf-16", "Other")
 ]
 
+USAMI_SUFFIX = "_Usami"
 
-def read_words(csv_path):
-    """ base_words.csv -> list of (yomi, word, kind) """
-    rows = []
-    if not csv_path.exists():
-        return rows
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
+# === ヘルパー関数 ===
+
+def generate_header_comment():
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    return f"# Generated on {timestamp} by GitHub Actions\n"
+
+def read_csv(filename):
+    with open(filename, encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            y = (row.get("よみ") or "").strip()
-            w = (row.get("単語") or "").strip()
-            if y and w:
-                rows.append((y, w, "word"))
-    return rows
+        return list(reader)
 
+def write_with_encoding(path, encoding, lines):
+    # 文字コードに応じて安全に書き込み
+    if encoding.lower().startswith("utf-16"):
+        with codecs.open(path, "w", encoding=encoding) as f:
+            f.writelines(lines)
+    else:
+        with open(path, "w", encoding=encoding, newline="") as f:
+            f.writelines(lines)
 
-def read_names(csv_path):
-    """ base_names.csv -> list of (yomi, word, kind) """
-    rows = []
-    if not csv_path.exists():
-        return rows
-    with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            sei_yomi = (row.get("姓よみ") or "").strip()
-            mei_yomi = (row.get("名よみ") or "").strip()
-            sei = (row.get("姓") or "").strip()
-            mei = (row.get("名") or "").strip()
-            if sei and mei:
-                # フルネーム
-                y_full = sei_yomi + mei_yomi
-                word_full = f"{sei} {mei}"  # スペースあり
-                rows.append((y_full, word_full, "full"))
-                # 姓のみ
-                if sei:
-                    rows.append((sei_yomi, sei, "sei"))
-                # 名のみ
-                if mei:
-                    rows.append((mei_yomi, mei, "mei"))
-    return rows
+# === メイン生成処理 ===
 
+def generate_files():
+    # 読み込み元CSV
+    base_people = read_csv(os.path.join(BASE_DIR, "base_people.csv"))
+    base_words = read_csv(os.path.join(BASE_DIR, "base_words.csv"))
 
-def dedupe_preserve_order(pairs):
-    """ (yomi, word, kind) の重複を削除 """
-    seen = set()
-    out = []
-    for y, w, k in pairs:
-        key = (y, w, k)
-        if key not in seen:
-            seen.add(key)
-            out.append((y, w, k))
-    return out
+    # 辞書データを格納するリスト
+    gboard_lines = []
+    msime_lines = []
+    other_lines = []
 
+    # === 人名 ===
+    for row in base_people:
+        sei_yomi = row["姓よみ"].strip()
+        mei_yomi = row["名よみ"].strip()
+        sei = row["姓"].strip()
+        mei = row["名"].strip()
 
-def write_dict_file(path, entries, formatter, encoding):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with codecs.open(path, "w", encoding=encoding) as f:
-        for y, w, kind in entries:
-            if kind == "full":
-                pos = "人名"
-            elif kind == "sei":
-                pos = "姓"
-            elif kind == "mei":
-                pos = "名"
-            else:
-                pos = "名詞"
-            f.write(formatter(y, w, pos))
+        full_yomi = sei_yomi + mei_yomi
+        full_name_space = f"{sei}　{mei}"
+        full_name_nospace = f"{sei}{mei}"
 
+        # 各形式に応じた書式
+        for with_space, full_name in [(True, full_name_space), (False, full_name_nospace)]:
+            suffix = "" if with_space else USAMI_SUFFIX
 
-def main():
-    base_dir = Path(".")
-    words = read_words(base_dir / WORDS_CSV)
-    names = read_names(base_dir / NAMES_CSV)
-    all_entries = dedupe_preserve_order(words + names)
+            gboard_lines.append(f"{full_yomi}\t{full_name}\tja-JP\n")
+            msime_lines.append(f"{full_yomi}\t{full_name}\t人名\n")
+            other_lines.append(f"{full_yomi}\t{full_name}\t人名\n")
 
-    for spec in TARGETS:
-        out_path = base_dir / spec["filename"]
-        usami_path = base_dir / spec["filename"].replace(".txt", "_Usami.txt")
+    # === 一般単語 ===
+    for row in base_words:
+        yomi = row["よみ"].strip()
+        word = row["単語"].strip()
+        pos = row.get("品詞", "名詞").strip()
 
+        gboard_lines.append(f"{yomi}\t{word}\tja-JP\n")
+        msime_lines.append(f"{yomi}\t{word}\t{pos}\n")
+        other_lines.append(f"{yomi}\t{word}\t{pos}\n")
+
+    # === 出力 ===
+    header = generate_header_comment()
+
+    for filename, encoding, label in FILES:
         # 通常版
-        write_dict_file(out_path, all_entries, spec["formatter"], spec["encoding"])
+        normal_path = os.path.join(OUTPUT_DIR, filename)
+        write_with_encoding(normal_path, encoding, [header] + locals()[f"{label.lower()}_lines"])
 
-        # Usami版（単語内スペース削除）
-        usami_entries = [(y, w.replace(" ", ""), k) for (y, w, k) in all_entries]
-        write_dict_file(usami_path, usami_entries, spec["formatter"], spec["encoding"])
+        # _Usami版
+        usami_path = os.path.join(OUTPUT_DIR, filename.replace(".txt", f"{USAMI_SUFFIX}.txt"))
+        write_with_encoding(usami_path, encoding, [header] + locals()[f"{label.lower()}_lines"])
 
-        print(f"生成完了: {out_path} 、 {usami_path}")
-
-    print("全ファイル生成が完了しました。")
-
+    print("✅ 全6ファイルを生成しました。")
 
 if __name__ == "__main__":
-    main()
+    generate_files()
